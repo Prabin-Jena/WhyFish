@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script>
+        (function () {
+            var savedTheme = localStorage.getItem("whyfish-theme");
+            var theme = savedTheme || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+            document.documentElement.dataset.theme = theme;
+        })();
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whyfish — Grounded Chess Analysis</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+    <header class="site-header">
+        <div class="brand-group">
+            <a href="/" class="brand">
+                <span class="brand-mark">♞</span>
+                Whyfish
+            </a>
+            <span class="brand-badge">Lab</span>
+            <p class="tagline">Stockfish knows what. Whyfish explains why.</p>
+        </div>
+
+        <nav class="nav">
+            <a href="/" class="active">Analyze</a>
+            <a href="/about.html">About</a>
+            <button role="switch" class="theme-toggle" id="theme-toggle" aria-checked="false" aria-label="Switch to light theme" type="button">
+                <span class="theme-toggle__track">
+                    <span class="theme-toggle__icon theme-toggle__icon--moon" aria-hidden="true">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    </span>
+                    <span class="theme-toggle__icon theme-toggle__icon--sun" aria-hidden="true">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                    </span>
+                    <span class="theme-toggle__knob"></span>
+                </span>
+            </button>
+        </nav>
+    </header>
+
+    <main>
+
+        <!-- ═══════════════════════════════════════════════════════
+             HERO
+        ═══════════════════════════════════════════════════════ -->
+        <section class="hero">
+            <div class="hero-content">
+                <div class="eyebrow">
+                    GROUNDED CHESS ANALYSIS
+                </div>
+
+                <h1>
+                    Stockfish knows what.
+                    <span>Whyfish explains why.</span>
+                </h1>
+
+                <p class="hero-subhead">
+                    Enter a position. Click an explanation.<br>
+                    Watch the chess idea happen.
+                </p>
+
+                <hr class="hero-rule">
+
+                <div class="hero-cta-group">
+                    <a href="#position-setup" class="btn-primary hero-cta-primary">
+                        Analyze a Position
+                    </a>
+                    <a href="#presets" class="btn-secondary hero-cta-secondary">
+                        Try a Demo Position
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════════
+             DEMO SECTION: TRY A POSITION
+        ═══════════════════════════════════════════════════════ -->
+        <section class="panel presets demo-section" id="presets">
+            <div class="section-heading">
+                <div>
+                    <span class="section-number">TRY A POSITION</span>
+                    <h2>See Whyfish explain a real chess idea. No FEN required.</h2>
+                </div>
+            </div>
+
+            <p class="section-description">
+                No setup needed — choose a position and watch Whyfish explain the move.
+            </p>
+
+            <div
+                id="presets-grid"
+                class="preset-cards-grid"
+            >
+                <p class="muted">
+                    Loading demo positions…
+                </p>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════════
+             STATIC PREVIEW — show the output before commitment
+        ═══════════════════════════════════════════════════════ -->
+        <section class="example-preview-section scroll-reveal">
+            <div class="example-preview-label">
+                <span class="example-badge">EXAMPLE ANALYSIS</span>
+                <span class="example-badge-desc">This is what Whyfish produces</span>
+            </div>
+
+            <div class="example-preview">
+                <!-- Engine Verdict — mirrors .verdict-card from analysis.html -->
+                <div class="verdict-card example-verdict-card">
+                    <div class="verdict-header">
+                        <span class="verdict-eyebrow">ENGINE VERDICT</span>
+                        <span class="verdict-source-badge">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                            Stockfish 16
+                        </span>
+                    </div>
+                    <div class="verdict-stats-grid">
+                        <div class="verdict-stat">
+                            <span class="verdict-stat-label">BEST MOVE</span>
+                            <span class="verdict-move-val">Nxe7+</span>
+                        </div>
+                        <div class="verdict-stat">
+                            <span class="verdict-stat-label">EVALUATION</span>
+                            <span class="verdict-eval-val">+2.4</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Why It Matters — mirrors .explanation-section -->
+                <div class="example-why-section">
+                    <div class="section-header-group">
+                        <div class="section-eyebrow">WHY IT MATTERS</div>
+                        <h2>The chess idea, step by step</h2>
+                    </div>
+
+                    <div class="explanation-steps">
+                        <!-- Step 01 -->
+                        <div class="explanation-step example-step" tabindex="-1" aria-disabled="true">
+                            <div class="step-number">01</div>
+                            <div class="step-content">
+                                <div class="step-top-line">
+                                    <span class="step-move-badge">Nxe7+</span>
+                                    <div class="step-squares-row">
+                                        <span class="step-squares-label">Key squares</span>
+                                        <span class="square-badge">d5</span>
+                                        <span class="square-badge">e7</span>
+                                    </div>
+                                </div>
+                                <p class="step-text">The knight forks king and queen, winning material. Black has no way to save both pieces simultaneously.</p>
+                            </div>
+                        </div>
+                        <!-- Step 02 -->
+                        <div class="explanation-step example-step" tabindex="-1" aria-disabled="true">
+                            <div class="step-number">02</div>
+                            <div class="step-content">
+                                <div class="step-top-line">
+                                    <span class="step-move-badge">Kg8</span>
+                                    <div class="step-squares-row">
+                                        <span class="step-squares-label">Key squares</span>
+                                        <span class="square-badge">e8</span>
+                                        <span class="square-badge">g8</span>
+                                    </div>
+                                </div>
+                                <p class="step-text">The king is forced back, abandoning the queen. White emerges with a decisive material advantage.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="example-footer-note">
+                Click any step in a real analysis to watch the move animate on the board →
+            </p>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════════
+             HOW IT WORKS
+        ═══════════════════════════════════════════════════════ -->
+        <section class="how-it-works">
+            <div class="how-header">
+                <div class="eyebrow">HOW IT WORKS</div>
+            </div>
+
+            <div class="how-steps">
+                <div class="how-step scroll-reveal" style="--reveal-delay: 0ms">
+                    <div class="how-step-number">01</div>
+                    <div class="how-step-connector" aria-hidden="true"></div>
+                    <div class="how-step-body">
+                        <h3 class="how-step-title">Enter a position</h3>
+                        <p class="how-step-desc">Paste a FEN string or choose a preset scenario below.</p>
+                    </div>
+                </div>
+
+                <div class="how-step scroll-reveal" style="--reveal-delay: 80ms">
+                    <div class="how-step-number">02</div>
+                    <div class="how-step-connector" aria-hidden="true"></div>
+                    <div class="how-step-body">
+                        <h3 class="how-step-title">Stockfish calculates</h3>
+                        <p class="how-step-desc">Best move, evaluation score, and candidate lines at depth 20.</p>
+                    </div>
+                </div>
+
+                <div class="how-step scroll-reveal" style="--reveal-delay: 160ms">
+                    <div class="how-step-number">03</div>
+                    <div class="how-step-connector how-step-connector--last" aria-hidden="true"></div>
+                    <div class="how-step-body">
+                        <h3 class="how-step-title">Whyfish explains why</h3>
+                        <p class="how-step-desc">Click any explanation step to watch the chess idea animate on the board.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════════
+             POSITION SETUP
+        ═══════════════════════════════════════════════════════ -->
+        <section class="panel position-setup" id="position-setup">
+            <div class="section-heading">
+                <div>
+                    <span class="section-number">ANALYZE A POSITION</span>
+                    <h2>Set up a position</h2>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="fen">
+                    <span>FEN STRING</span>
+                    <span class="muted" style="font-size: 0.7rem; font-weight: normal;">Standard notation</span>
+                </label>
+                <textarea
+                    id="fen"
+                    rows="3"
+                    spellcheck="false"
+                    autocomplete="off"
+                    placeholder="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+                ></textarea>
+                <p class="field-help">
+                    Paste any valid FEN position with side to move, castling rights, and en passant square.
+                </p>
+            </div>
+
+            <div class="field">
+                <label for="human-move">
+                    <span>YOUR MOVE</span>
+                    <span class="optional input-hint">optional — leave blank for best-move analysis</span>
+                </label>
+                <input
+                    id="human-move"
+                    type="text"
+                    maxlength="5"
+                    autocomplete="off"
+                    spellcheck="false"
+                    placeholder="e.g. Qh5 — we'll explain why the engine disagrees"
+                >
+                <p class="field-help">
+                    Enter a UCI move (e.g. <code>e2e4</code> or <code>g1f3</code>) to compare against Stockfish's top recommendation.
+                </p>
+            </div>
+
+            <button
+                id="setup-btn"
+                class="btn-primary btn-primary--full"
+                type="button"
+            >
+                <span>Analyze Position</span>
+                <span aria-hidden="true">→</span>
+            </button>
+        </section>
+
+        <div
+            id="page-error"
+            class="error-box"
+            hidden
+        ></div>
+
+    </main>
+
+    <footer class="site-footer">
+        <div>
+            <strong>Whyfish</strong> — HackDevengers 2.0 · 2026
+        </div>
+        <div>
+            <a href="/about.html">About Methodology</a>
+        </div>
+    </footer>
+
+</div>
+
+<script>
+"use strict";
+
+const DEFAULT_FEN =
+    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
+const fenInput =
+    document.getElementById("fen");
+
+const humanMoveInput =
+    document.getElementById("human-move");
+
+const setupButton =
+    document.getElementById("setup-btn");
+
+const presetsContainer =
+    document.getElementById("presets-grid");
+
+const errorBox =
+    document.getElementById("page-error");
+
+function showError(message) {
+    errorBox.textContent = message;
+    errorBox.hidden = false;
+}
+
+function clearError() {
+    errorBox.textContent = "";
+    errorBox.hidden = true;
+}
+
+function startAnalysis(fen, humanMove = "") {
+    const cleanFen = fen.trim();
+    const cleanHumanMove = humanMove.trim();
+
+    if (!cleanFen) {
+        showError("Please provide a FEN position.");
+        return;
+    }
+
+    clearError();
+
+    sessionStorage.setItem("fen", cleanFen);
+
+    if (cleanHumanMove) {
+        sessionStorage.setItem("human_move", cleanHumanMove);
+    } else {
+        sessionStorage.removeItem("human_move");
+    }
+
+    window.location.href = "/analysis.html";
+}
+
+setupButton.addEventListener("click", () => {
+    sessionStorage.removeItem("whyfish-preset-name");
+    startAnalysis(
+        fenInput.value,
+        humanMoveInput.value
+    );
+});
+
+humanMoveInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        sessionStorage.removeItem("whyfish-preset-name");
+        startAnalysis(
+            fenInput.value,
+            humanMoveInput.value
+        );
+    }
+});
+
+fenInput.value = DEFAULT_FEN;
+
+function getPresetIcon(name) {
+    const lower = name.toLowerCase();
+    if (lower.includes("fork") || lower.includes("knight")) {
+        return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="preset-card-icon" aria-hidden="true"><path d="M19 21v-4a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v4"></path><path d="M12 3a6 6 0 0 0-6 6c0 3 2 5 2 7"></path><path d="M14 7l2-2"></path><circle cx="10" cy="8" r="1"></circle></svg>`;
+    } else if (lower.includes("back rank") || lower.includes("rook")) {
+        return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="preset-card-icon" aria-hidden="true"><path d="M5 20h14"></path><path d="M6 20V9h12v11"></path><path d="M6 9l-1-4h3v2h2V5h4v2h2V5h3l-1 4"></path></svg>`;
+    } else if (lower.includes("scholar") || lower.includes("queen")) {
+        return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="preset-card-icon" aria-hidden="true"><path d="M4 18h16"></path><path d="M5 18l2-10 5 6 5-6 2 10"></path><circle cx="7" cy="7" r="1.2"></circle><circle cx="12" cy="7" r="1.2"></circle><circle cx="17" cy="7" r="1.2"></circle></svg>`;
+    } else if (lower.includes("fool") || lower.includes("king")) {
+        return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="preset-card-icon" aria-hidden="true"><path d="M12 4v4m-2-2h4"></path><path d="M7 20h10"></path><path d="M7 20V12c0-1.5 2-4 5-4s5 2.5 5 4v8"></path></svg>`;
+    } else {
+        return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="preset-card-icon" aria-hidden="true"><path d="M8 20h8"></path><path d="M9 20v-3c0-1 1-2 3-2s3 1 3 2v3"></path><circle cx="12" cy="9" r="4"></circle></svg>`;
+    }
+}
+
+function getPresetSummary(name, fallbackDesc) {
+    const lower = name.toLowerCase();
+    if (lower.includes("fork")) {
+        return "Knight forks king and queen";
+    }
+    if (lower.includes("back rank")) {
+        return "The back rank weakness";
+    }
+    if (lower.includes("scholar")) {
+        return "The classic four-move attack";
+    }
+    if (lower.includes("fool")) {
+        return "Fastest possible checkmate";
+    }
+    if (lower.includes("start")) {
+        return "Standard chess starting position";
+    }
+    return fallbackDesc && fallbackDesc.length > 50
+        ? fallbackDesc.slice(0, 50).trimEnd() + "…"
+        : (fallbackDesc || "");
+}
+
+async function loadPresets() {
+    try {
+        const response = await fetch("/api/presets");
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const presets = await response.json();
+
+        if (!Array.isArray(presets)) {
+            throw new Error("Invalid preset response.");
+        }
+
+        presetsContainer.replaceChildren();
+
+        for (const preset of presets) {
+            const card = document.createElement("button");
+            card.type = "button";
+            card.className = "preset-card";
+
+            const header = document.createElement("div");
+            header.className = "preset-card-header";
+
+            const iconSpan = document.createElement("span");
+            iconSpan.className = "preset-card-icon-wrap";
+            iconSpan.innerHTML = getPresetIcon(preset.name);
+
+            const title = document.createElement("span");
+            title.className = "preset-card-title";
+            title.textContent = preset.name;
+
+            header.append(iconSpan, title);
+            card.appendChild(header);
+
+            if (preset.description) {
+                const desc = document.createElement("span");
+                desc.className = "preset-card-desc";
+                desc.textContent = getPresetSummary(preset.name, preset.description);
+                card.appendChild(desc);
+                card.title = preset.description;
+            }
+
+            card.addEventListener("click", () => {
+                sessionStorage.setItem("whyfish-preset-name", preset.name);
+                startAnalysis(preset.fen);
+            });
+
+            presetsContainer.appendChild(card);
+        }
+
+    } catch (error) {
+        console.error("Failed to load presets:", error);
+        presetsContainer.replaceChildren();
+
+        const message = document.createElement("p");
+        message.className = "muted";
+        message.textContent =
+            "Could not load demo positions. You can still enter a FEN manually.";
+
+        presetsContainer.appendChild(message);
+    }
+}
+
+loadPresets();
+</script>
+
+<script>
+// ── Theme Toggle ──────────────────────────────────────────────
+(function () {
+    const toggleBtn = document.getElementById("theme-toggle");
+    if (!toggleBtn) return;
+
+    function syncToggleState(theme) {
+        const isLight = theme === "light";
+        toggleBtn.setAttribute("aria-checked", isLight ? "true" : "false");
+        toggleBtn.setAttribute(
+            "aria-label",
+            isLight ? "Switch to dark theme" : "Switch to light theme"
+        );
+    }
+
+    const currentTheme = document.documentElement.dataset.theme || "dark";
+    syncToggleState(currentTheme);
+
+    toggleBtn.addEventListener("click", () => {
+        const activeTheme = document.documentElement.dataset.theme === "light" ? "light" : "dark";
+        const nextTheme = activeTheme === "light" ? "dark" : "light";
+        document.documentElement.dataset.theme = nextTheme;
+        localStorage.setItem("whyfish-theme", nextTheme);
+        syncToggleState(nextTheme);
+    });
+
+    window.matchMedia("(prefers-color-scheme: light)").addEventListener("change", (e) => {
+        if (!localStorage.getItem("whyfish-theme")) {
+            const newTheme = e.matches ? "light" : "dark";
+            document.documentElement.dataset.theme = newTheme;
+            syncToggleState(newTheme);
+        }
+    });
+})();
+</script>
+
+<script>
+// ── Scroll Reveal (Intersection Observer) ────────────────────
+(function () {
+    // Respect prefers-reduced-motion — skip observer setup entirely
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        document.querySelectorAll(".scroll-reveal").forEach(function (el) {
+            el.classList.add("scroll-reveal--visible");
+        });
+        return;
+    }
+
+    const observer = new IntersectionObserver(
+        function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    const el = entry.target;
+                    const delay = el.style.getPropertyValue("--reveal-delay") || "0ms";
+                    setTimeout(function () {
+                        el.classList.add("scroll-reveal--visible");
+                    }, parseInt(delay, 10) || 0);
+                    observer.unobserve(el);
+                }
+            });
+        },
+        { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+    );
+
+    document.querySelectorAll(".scroll-reveal").forEach(function (el) {
+        observer.observe(el);
+    });
+})();
+</script>
+
+</body>
+</html>

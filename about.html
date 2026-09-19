@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script>
+        (function () {
+            var savedTheme = localStorage.getItem("whyfish-theme");
+            var theme = savedTheme || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+            document.documentElement.dataset.theme = theme;
+        })();
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whyfish — About Methodology</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+    <header class="site-header">
+        <div class="brand-group">
+            <a href="/" class="brand">
+                <span class="brand-mark">♞</span>
+                Whyfish
+            </a>
+            <span class="brand-badge">Lab</span>
+            <p class="tagline">Stockfish knows what. Whyfish explains why.</p>
+        </div>
+
+        <nav class="nav">
+            <a href="/" class="nav-action-btn">
+                <span>Analyze</span>
+            </a>
+            <a href="/about.html" class="active">About</a>
+            <button role="switch" class="theme-toggle" id="theme-toggle" aria-checked="false" aria-label="Switch to light theme" type="button">
+                <span class="theme-toggle__track">
+                    <span class="theme-toggle__icon theme-toggle__icon--moon" aria-hidden="true">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    </span>
+                    <span class="theme-toggle__icon theme-toggle__icon--sun" aria-hidden="true">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                    </span>
+                    <span class="theme-toggle__knob"></span>
+                </span>
+            </button>
+        </nav>
+    </header>
+
+    <main>
+
+        <section class="hero about-hero">
+            <div class="hero-content">
+                <div class="eyebrow">
+                    METHODOLOGY & GROUNDING
+                </div>
+
+                <h1>
+                    Stockfish knows what.
+                    <span>Whyfish explains why.</span>
+                </h1>
+
+                <p>
+                    Whyfish takes a chess position and uses Stockfish's real calculations to generate human-readable tactical explanations strictly grounded in the engine's verified telemetry.
+                </p>
+
+                <hr class="hero-rule">
+            </div>
+        </section>
+
+        <!-- Three Core Principles -->
+        <section class="about-grid">
+            <article class="panel">
+                <span class="section-number">
+                    01 // EVIDENCE
+                </span>
+                <h2>
+                    ENGINE EVIDENCE
+                </h2>
+                <p>
+                    Stockfish analyzes the supplied position and produces candidate lines, evaluations, and relevant squares with mathematical rigor.
+                </p>
+            </article>
+
+            <article class="panel">
+                <span class="section-number">
+                    02 // GROUNDING
+                </span>
+                <h2>
+                    GROUNDED EXPLANATION
+                </h2>
+                <p>
+                    The structured engine output is supplied to the language model with explicit constraints on the coordinates and lines it can reference.
+                </p>
+            </article>
+
+            <article class="panel">
+                <span class="section-number">
+                    03 // VALIDATION
+                </span>
+                <h2>
+                    MECHANICAL VALIDATION
+                </h2>
+                <p>
+                    Generated moves and evidence references are checked against the structured engine output before they reach the interface.
+                </p>
+            </article>
+        </section>
+
+        <!-- Vertical Pipeline Timeline -->
+        <section class="panel methodology">
+            <div class="section-heading">
+                <div>
+                    <span class="section-number">
+                        ARCHITECTURE // PIPELINE
+                    </span>
+                    <h2>
+                        How Whyfish works
+                    </h2>
+                </div>
+            </div>
+
+            <ol class="pipeline">
+                <li>
+                    <div class="pipeline-step-node">01</div>
+                    <strong>Position</strong>
+                    <span>A FEN position is supplied by the user or chosen from curated scenarios.</span>
+                </li>
+
+                <li>
+                    <div class="pipeline-step-node">02</div>
+                    <strong>Stockfish</strong>
+                    <span>The engine calculates the position, principal variations, and candidate evaluations.</span>
+                </li>
+
+                <li>
+                    <div class="pipeline-step-node">03</div>
+                    <strong>Grounding</strong>
+                    <span>Structured engine evidence is supplied to the explanation model with bounded context.</span>
+                </li>
+
+                <li>
+                    <div class="pipeline-step-node">04</div>
+                    <strong>Mechanical Validation</strong>
+                    <span>Generated moves and evidence squares are mechanically checked against engine output.</span>
+                </li>
+
+                <li>
+                    <div class="pipeline-step-node">05</div>
+                    <strong>Grounded Explanation</strong>
+                    <span>The validated explanation is presented with interactive chessboard square telemetry.</span>
+                </li>
+            </ol>
+        </section>
+
+        <!-- Bottom Call to Action -->
+        <section class="cta-panel">
+            <div>
+                <div class="eyebrow">
+                    READY
+                </div>
+                <h2>
+                    Analyze a position.
+                </h2>
+                <p>
+                    See the engine's move, evaluation, and grounded explanation in action.
+                </p>
+            </div>
+
+            <a href="/" class="btn-primary">
+                <span>Start analyzing</span>
+                <span aria-hidden="true">→</span>
+            </a>
+        </section>
+
+    </main>
+
+    <footer class="site-footer">
+        <div>
+            <strong>Whyfish</strong> — HackDevengers 2.0 · 2026
+        </div>
+        <div>
+            <a href="/">Back to Analyzer</a>
+        </div>
+    </footer>
+
+</div>
+
+<script>
+(function () {
+    const toggleBtn = document.getElementById("theme-toggle");
+    if (!toggleBtn) return;
+
+    function syncToggleState(theme) {
+        const isLight = theme === "light";
+        toggleBtn.setAttribute("aria-checked", isLight ? "true" : "false");
+        toggleBtn.setAttribute(
+            "aria-label",
+            isLight ? "Switch to dark theme" : "Switch to light theme"
+        );
+    }
+
+    const currentTheme = document.documentElement.dataset.theme || "dark";
+    syncToggleState(currentTheme);
+
+    toggleBtn.addEventListener("click", () => {
+        const activeTheme = document.documentElement.dataset.theme === "light" ? "light" : "dark";
+        const nextTheme = activeTheme === "light" ? "dark" : "light";
+        document.documentElement.dataset.theme = nextTheme;
+        localStorage.setItem("whyfish-theme", nextTheme);
+        syncToggleState(nextTheme);
+    });
+
+    window.matchMedia("(prefers-color-scheme: light)").addEventListener("change", (e) => {
+        if (!localStorage.getItem("whyfish-theme")) {
+            const newTheme = e.matches ? "light" : "dark";
+            document.documentElement.dataset.theme = newTheme;
+            syncToggleState(newTheme);
+        }
+    });
+})();
+</script>
+
+</body>
+
+</html>

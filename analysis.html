@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script>
+        (function () {
+            var savedTheme = localStorage.getItem("whyfish-theme");
+            var theme = savedTheme || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+            document.documentElement.dataset.theme = theme;
+        })();
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whyfish — Chess Position Analysis</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .is-hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <header class="site-header">
+        <div class="brand-group">
+            <a href="/" class="brand">
+                <span class="brand-mark">♞</span>
+                Whyfish
+            </a>
+            <span class="brand-badge">Lab</span>
+            <p class="tagline">Stockfish knows what. Whyfish explains why.</p>
+        </div>
+
+        <nav class="nav">
+            <a href="/" class="nav-action-btn">
+                <span>+ New Analysis</span>
+            </a>
+            <a href="/about.html">About</a>
+            <button role="switch" class="theme-toggle" id="theme-toggle" aria-checked="false" aria-label="Switch to light theme" type="button">
+                <span class="theme-toggle__track">
+                    <span class="theme-toggle__icon theme-toggle__icon--moon" aria-hidden="true">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    </span>
+                    <span class="theme-toggle__icon theme-toggle__icon--sun" aria-hidden="true">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                    </span>
+                    <span class="theme-toggle__knob"></span>
+                </span>
+            </button>
+        </nav>
+    </header>
+
+    <main>
+
+        <section class="analysis-header">
+            <div class="eyebrow">
+                POSITION ANALYSIS
+            </div>
+
+            <h1>
+                Why this move?
+            </h1>
+
+            <p class="analysis-header-lead">
+                Stockfish evaluates candidate moves and tactical lines while Whyfish explains the underlying chess concepts with verifiable engine evidence.
+            </p>
+
+            <div class="fen-container" id="fen-container">
+                <span class="fen-label">FEN</span>
+                <code id="fen-display" class="fen-display"></code>
+                <button
+                    id="copy-fen-btn"
+                    class="fen-copy-btn"
+                    type="button"
+                    title="Copy FEN to clipboard"
+                    aria-label="Copy FEN"
+                >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </button>
+            </div>
+        </section>
+
+        <section class="analysis-layout">
+
+            <!-- LEFT: CHESSBOARD -->
+            <div class="board-panel">
+                <div class="board-wrapper">
+                    <div
+                        id="chessboard"
+                        class="chessboard"
+                        aria-label="Chess board"
+                        role="region"
+                    ></div>
+                </div>
+
+                <div class="replay-controls" role="group" aria-label="Move replay navigation">
+                    <button id="replay-prev" type="button" aria-label="Previous move" title="Previous move">
+                        <!-- left arrow -->
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </button>
+                    <button id="replay-play" type="button" aria-label="Play explanation" title="Auto-play moves">
+                        <!-- play triangle -->
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><polygon points="5,3 19,12 5,21"></polygon></svg>
+                    </button>
+                    <button id="replay-pause" type="button" aria-label="Pause replay" title="Pause auto-play" hidden>
+                        <!-- pause bars -->
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                    </button>
+                    <button id="replay-next" type="button" aria-label="Next move" title="Next move">
+                        <!-- right arrow -->
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </button>
+                    <span class="replay-counter" aria-live="polite">
+                        <span id="replay-current">0</span>
+                        <span class="replay-sep">/</span>
+                        <span id="replay-total">0</span>
+                    </span>
+                </div>
+
+                <div
+                    id="board-status"
+                    class="board-status status-analyzing"
+                    role="status"
+                    aria-live="polite"
+                >
+                    <span class="board-status-dot"></span>
+                    <span id="board-status-text">Preparing position…</span>
+                </div>
+            </div>
+
+            <!-- RIGHT: RESULTS & EXPLANATION -->
+            <div class="results-panel">
+
+                <!-- Loading State -->
+                <div
+                    id="analysis-pending"
+                    class="loading-card"
+                    role="status"
+                    aria-live="polite"
+                >
+                    <div
+                        id="thinking-orb"
+                        class="thinking-orb"
+                        aria-hidden="true"
+                    ></div>
+
+                    <div class="loading-content">
+                        <strong>Analyzing position</strong>
+                        <p>Stockfish is calculating candidate moves and verifying grounded evidence…</p>
+                    </div>
+                </div>
+
+                <!-- Error State -->
+                <div
+                    id="analysis-error"
+                    class="error-box is-hidden"
+                    role="alert"
+                ></div>
+
+                <!-- Results Area -->
+                <div
+                    id="analysis-results"
+                    class="is-hidden"
+                >
+
+                    <!-- Demo Position Contextual Eyebrow (when loaded from preset) -->
+                    <div id="demo-badge" class="demo-context-badge is-hidden" aria-label="Demo position indicator">
+                        <span class="demo-badge-tag">DEMO POSITION</span>
+                        <span class="demo-badge-sep">·</span>
+                        <span id="demo-badge-name" class="demo-badge-name"></span>
+                    </div>
+
+                    <!-- 1. WHAT: Engine Verdict -->
+                    <section
+                        id="eval-summary"
+                        class="verdict-card card-verdict"
+                        aria-label="Engine Verdict"
+                    ></section>
+
+                    <!-- Human Move Comparison (when available) -->
+                    <section
+                        id="human-comparison"
+                        class="comparison-card card-comparison"
+                        hidden
+                        aria-label="Human Move Comparison"
+                    ></section>
+
+                    <!-- 2. WHY: Why It Matters -->
+                    <section class="explanation-section" aria-label="Why It Matters">
+                        <div class="section-header-group">
+                            <div class="section-eyebrow" id="explanation-header">
+                                WHY IT MATTERS
+                            </div>
+                            <h2>
+                                The Explanation
+                            </h2>
+                            <p class="section-description">
+                                Structured engine evidence cited in each step is mechanically validated against Stockfish's calculations.
+                            </p>
+                        </div>
+
+                        <div
+                            id="explanation-steps"
+                            class="explanation-steps"
+                        ></div>
+                    </section>
+
+                    <!-- 3. EVIDENCE: Engine Evidence -->
+                    <section
+                        id="engine-evidence"
+                        class="evidence-section card-telemetry"
+                        aria-label="Engine Evidence"
+                    >
+                        <div class="section-header-group">
+                            <div class="section-eyebrow">
+                                ENGINE EVIDENCE
+                            </div>
+                            <h2>
+                                Verified Telemetry
+                            </h2>
+                            <p class="section-description">
+                                Real calculated coordinates and move citations supporting this explanation.
+                            </p>
+                        </div>
+
+                        <div
+                            id="evidence-container"
+                            class="evidence-grid"
+                        ></div>
+                    </section>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <footer class="site-footer">
+        <div>
+            <strong>Whyfish</strong> — Stockfish knows what. Whyfish explains why.
+        </div>
+        <div>
+            <a href="/">Analyze another position</a>
+        </div>
+    </footer>
+
+</div>
+
+<script type="module">
+"use strict";
+
+/* -----------------------------------------------------------------------
+   Thinking Orb (Analysis Loading State)
+----------------------------------------------------------------------- */
+
+let thinkingOrb = null;
+
+async function initThinkingOrb() {
+    const orbElement = document.getElementById("thinking-orb");
+    if (!orbElement) {
+        return;
+    }
+
+    try {
+        const { ThinkingOrb } = await import("https://esm.sh");
+        if (typeof ThinkingOrb === "function") {
+            const currentTheme = document.documentElement.dataset.theme === "light" ? "light" : "dark";
+            thinkingOrb = new ThinkingOrb({
+                element: orbElement,
+                size: "avatar",
+                theme: currentTheme
+            });
+            window.thinkingOrb = thinkingOrb;
+            if (pending && !pending.classList.contains("is-hidden")) {
+                thinkingOrb.setState?.("working");
+            }
+        } else {
+            throw new Error("ThinkingOrb is not a constructor");
+        }
+    } catch (err) {
+        console.warn("Thinking Orb unavailable:", err);
+        // existing CSS fallback takes over — no user-facing error
+        orbElement.classList.add("orb-fallback");
+    }
+}
+
+/* -----------------------------------------------------------------------
+   Session data
+----------------------------------------------------------------------- */
+
+const fen =
+    (sessionStorage.getItem("fen") || "").trim();
+
+const humanMove =
+    (sessionStorage.getItem("human_move") || "").trim() || null;
+
+/* -----------------------------------------------------------------------
+   DOM Elements
+----------------------------------------------------------------------- */
+
+const chessboard =
+    document.getElementById("chessboard");
+
+const fenDisplay =
+    document.getElementById("fen-display");
+
+const copyFenBtn =
+    document.getElementById("copy-fen-btn");
+
+const boardStatus =
+    document.getElementById("board-status");
+
+const boardStatusText =
+    document.getElementById("board-status-text");
+
+const pending =
+    document.getElementById("analysis-pending");
+
+const errorBox =
+    document.getElementById("analysis-error");
+
+const results =
+    document.getElementById("analysis-results");
+
+const evalSummary =
+    document.getElementById("eval-summary");
+
+const humanComparison =
+    document.getElementById("human-comparison");
+
+const demoBadge =
+    document.getElementById("demo-badge");
+
+const demoBadgeName =
+    document.getElementById("demo-badge-name");
+
+function showDemoLabel(name) {
+    if (!demoBadge || !demoBadgeName) return;
+
+    let displayName = name;
+    if (name.toLowerCase().includes("knight fork")) {
+        displayName = "Tactical Fork";
+    } else if (name.toLowerCase().includes("scholar's mate")) {
+        displayName = "Scholar's Mate";
+    } else if (name.toLowerCase().includes("fool's mate")) {
+        displayName = "Fool's Mate";
+    }
+    demoBadgeName.textContent = displayName;
+    demoBadge.classList.remove("is-hidden");
+}
+
+const presetName = sessionStorage.getItem("whyfish-preset-name");
+if (presetName) {
+    showDemoLabel(presetName);
+    sessionStorage.removeItem("whyfish-preset-name");
+}
+
+const explanationHeader =
+    document.getElementById("explanation-header");
+
+const explanationSteps =
+    document.getElementById("explanation-steps");
+
+const evidenceContainer =
+    document.getElementById("evidence-container");
+
+const replayPrevBtn =
+    document.getElementById("replay-prev");
+
+const replayPlayBtn =
+    document.getElementById("replay-play");
+
+const replayPauseBtn =
+    document.getElementById("replay-pause");
+
+const replayNextBtn =
+    document.getElementById("replay-next");
+
+const replayCurrentSpan =
+    document.getElementById("replay-current");
+
+const replayTotalSpan =
+    document.getElementById("replay-total");
+
+/* -----------------------------------------------------------------------
+   Client-side replay state
+----------------------------------------------------------------------- */
+
+let replayBoard = null;       // current replay position (2D array clone)
+let currentReplayStep = -1;   // index of active explanation step (-1 = initial)
+let replayAnimating = false;  // guard against concurrent animations
+let explanationStepsData = [];
+let autoPlayTimer = null;
+
+/* -----------------------------------------------------------------------
+   Chess pieces
+----------------------------------------------------------------------- */
+
+const PIECES = {
+    "K": "♔",
+    "Q": "♕",
+    "R": "♖",
+    "B": "♗",
+    "N": "♘",
+    "P": "♙",
+    "k": "♚",
+    "q": "♛",
+    "r": "♜",
+    "b": "♝",
+    "n": "♞",
+    "p": "♟"
+};
+
+/* -----------------------------------------------------------------------
+   Board parser
+----------------------------------------------------------------------- */
+
+function parseFenBoard(fenString) {
+    const fields = fenString.split(/\s+/);
+
+    if (fields.length < 4) {
+        throw new Error("Invalid FEN format.");
+    }
+
+    const placement = fields[0];
+    const ranks = placement.split("/");
+
+    if (ranks.length !== 8) {
+        throw new Error("FEN must contain exactly 8 ranks.");
+    }
+
+    const board = [];
+
+    for (let rankIndex = 0; rankIndex < 8; rankIndex++) {
+        const rank = ranks[rankIndex];
+        const row = [];
+
+        for (const character of rank) {
+            if (/[1-8]/.test(character)) {
+                const emptyCount = Number(character);
+                for (let i = 0; i < emptyCount; i++) {
+                    row.push(null);
+                }
+            } else if (PIECES[character]) {
+                row.push(character);
+            } else {
+                throw new Error("Invalid piece in FEN.");
+            }
+        }
+
+        if (row.length !== 8) {
+            throw new Error(`Invalid FEN rank ${8 - rankIndex}.`);
+        }
+
+        board.push(row);
+    }
+
+    return board;
+}
+
+/* -----------------------------------------------------------------------
+   Board rendering
+----------------------------------------------------------------------- */
+
+function squareName(row, column) {
+    const files = "abcdefgh";
+    const rank = 8 - row;
+    return files[column] + rank;
+}
+
+function renderBoard(boardData = null) {
+    chessboard.replaceChildren();
+
+    const board = boardData || replayBoard || parseFenBoard(fen);
+
+    for (let row = 0; row < 8; row++) {
+        for (let column = 0; column < 8; column++) {
+            const square = document.createElement("div");
+            const name = squareName(row, column);
+            const isLight = (row + column) % 2 === 0;
+
+            square.className = isLight
+                ? "chess-square light"
+                : "chess-square dark";
+
+            square.dataset.square = name;
+
+            const coordinate = document.createElement("span");
+            coordinate.className = "square-coordinate";
+
+            if (column === 0) {
+                coordinate.textContent = String(8 - row);
+                coordinate.classList.add("rank-coordinate");
+                square.appendChild(coordinate);
+            }
+
+            if (row === 7) {
+                const fileCoord = document.createElement("span");
+                fileCoord.className = "square-coordinate file-coordinate";
+                fileCoord.textContent = "abcdefgh"[column];
+                square.appendChild(fileCoord);
+            }
+
+            const piece = board[row][column];
+            if (piece) {
+                const pieceElement = document.createElement("span");
+                pieceElement.className = "piece chess-piece " + (piece === piece.toUpperCase()
+                    ? "white-piece"
+                    : "black-piece");
+                pieceElement.textContent = PIECES[piece];
+                square.appendChild(pieceElement);
+            }
+
+            chessboard.appendChild(square);
+        }
+    }
+}
+
+/* -----------------------------------------------------------------------
+   Highlighting
+----------------------------------------------------------------------- */
+
+function clearHighlights() {
+    chessboard
+        .querySelectorAll(".evidence-square")
+        .forEach((element) => {
+            element.classList.remove("evidence-square");
+        });
+}
+
+function highlightSquares(squares, activeCard = null) {
+    clearHighlights();
+
+    if (activeCard && explanationSteps) {
+        explanationSteps
+            .querySelectorAll(".explanation-step")
+            .forEach((card) => card.classList.remove("is-active"));
+        activeCard.classList.add("is-active");
+    }
+
+    if (!Array.isArray(squares)) {
+        return;
+    }
+
+    for (const square of squares) {
+        if (!/^[a-h][1-8]$/.test(square)) {
+            continue;
+        }
+
+        const element = chessboard.querySelector(`[data-square="${square}"]`);
+        if (element) {
+            element.classList.add("evidence-square");
+        }
+    }
+}
+
+/* -----------------------------------------------------------------------
+   UCI parsing & Move application
+----------------------------------------------------------------------- */
+
+function parseUciMove(moveUci) {
+    if (typeof moveUci !== "string" || !/^[a-h][1-8][a-h][1-8][qrbn]?$/i.test(moveUci)) {
+        return null;
+    }
+    const clean = moveUci.toLowerCase();
+    const fromSquare = clean.slice(0, 2);
+    const toSquare = clean.slice(2, 4);
+    const promotion = clean.length === 5 ? clean[4] : null;
+
+    const files = "abcdefgh";
+    return {
+        from: fromSquare,
+        to: toSquare,
+        promotion: promotion,
+        fromCol: files.indexOf(fromSquare[0]),
+        fromRow: 8 - parseInt(fromSquare[1], 10),
+        toCol: files.indexOf(toSquare[0]),
+        toRow: 8 - parseInt(toSquare[1], 10)
+    };
+}
+
+function isWhite(piece) {
+    return piece && piece === piece.toUpperCase();
+}
+
+function isCastling(piece, move) {
+    if (!piece || piece.toLowerCase() !== "k") return false;
+    return Math.abs(move.toCol - move.fromCol) === 2;
+}
+
+function moveCastlingRook(board, move) {
+    if (move.toCol === 6) { // Kingside: rook from h to f
+        const rook = board[move.fromRow][7];
+        board[move.fromRow][5] = rook;
+        board[move.fromRow][7] = null;
+    } else if (move.toCol === 2) { // Queenside: rook from a to d
+        const rook = board[move.fromRow][0];
+        board[move.fromRow][3] = rook;
+        board[move.fromRow][0] = null;
+    }
+}
+
+function isEnPassant(piece, move, board) {
+    if (!piece || piece.toLowerCase() !== "p") return false;
+    return move.fromCol !== move.toCol && board[move.toRow][move.toCol] === null;
+}
+
+function removeEnPassantPawn(board, move) {
+    board[move.fromRow][move.toCol] = null;
+}
+
+function applyMoveToBoard(board, move) {
+    const next = board.map((row) => [...row]);
+    const piece = next[move.fromRow][move.fromCol];
+    if (!piece) return next;
+
+    next[move.toRow][move.toCol] = move.promotion
+        ? (isWhite(piece) ? move.promotion.toUpperCase() : move.promotion.toLowerCase())
+        : piece;
+    next[move.fromRow][move.fromCol] = null;
+
+    if (isCastling(piece, move)) {
+        moveCastlingRook(next, move);
+    }
+
+    if (isEnPassant(piece, move, board)) {
+        removeEnPassantPawn(next, move);
+    }
+
+    return next;
+}
+
+/* -----------------------------------------------------------------------
+   Piece animation
+----------------------------------------------------------------------- */
+
+function animatePieceMove(fromSquare, toSquare, onComplete, special = {}) {
+    const fromEl = chessboard.querySelector(`[data-square="${fromSquare}"]`);
+    const toEl = chessboard.querySelector(`[data-square="${toSquare}"]`);
+
+    if (!fromEl || !toEl) {
+        onComplete();
+        return;
+    }
+
+    const pieceEl = fromEl.querySelector(".piece");
+    if (!pieceEl) {
+        onComplete();
+        return;
+    }
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        onComplete();
+        return;
+    }
+
+    fromEl.classList.add("move-source");
+    toEl.classList.add("move-dest");
+
+    let capturedPieceEl = toEl.querySelector(".piece");
+    if (special.enPassantSquare) {
+        const epEl = chessboard.querySelector(`[data-square="${special.enPassantSquare}"]`);
+        if (epEl) {
+            capturedPieceEl = epEl.querySelector(".piece");
+        }
+    }
+
+    if (capturedPieceEl) {
+        capturedPieceEl.classList.add("is-captured");
+    }
+
+    let rookPieceEl = null;
+    if (special.rookFrom && special.rookTo) {
+        const rFromEl = chessboard.querySelector(`[data-square="${special.rookFrom}"]`);
+        const rToEl = chessboard.querySelector(`[data-square="${special.rookTo}"]`);
+        if (rFromEl && rToEl) {
+            rookPieceEl = rFromEl.querySelector(".piece");
+            if (rookPieceEl) {
+                const rFromRect = rFromEl.getBoundingClientRect();
+                const rToRect = rToEl.getBoundingClientRect();
+                const rDx = rToRect.left - rFromRect.left;
+                const rDy = rToRect.top - rFromRect.top;
+                rookPieceEl.classList.add("is-moving");
+                rookPieceEl.style.transform = `translate(${rDx}px, ${rDy}px)`;
+            }
+        }
+    }
+
+    const fromRect = fromEl.getBoundingClientRect();
+    const toRect = toEl.getBoundingClientRect();
+    const dx = toRect.left - fromRect.left;
+    const dy = toRect.top - fromRect.top;
+
+    pieceEl.classList.add("is-moving");
+    pieceEl.style.transform = `translate(${dx}px, ${dy}px)`;
+
+    let finished = false;
+    const finish = () => {
+        if (finished) return;
+        finished = true;
+        fromEl.classList.remove("move-source");
+        toEl.classList.remove("move-dest");
+        pieceEl.classList.remove("is-moving");
+        pieceEl.style.transform = "";
+        if (rookPieceEl) {
+            rookPieceEl.classList.remove("is-moving");
+            rookPieceEl.style.transform = "";
+        }
+        if (capturedPieceEl) {
+            capturedPieceEl.remove();
+        }
+        onComplete();
+    };
+
+    pieceEl.addEventListener("transitionend", finish, { once: true });
+    setTimeout(finish, 420);
+}
+
+/* -----------------------------------------------------------------------
+   Step replay model
+----------------------------------------------------------------------- */
+
+function updateActiveCard(index) {
+    const cards = explanationSteps.querySelectorAll(".explanation-step");
+    cards.forEach((card, i) => {
+        if (i === index) {
+            card.classList.add("is-active");
+            card.setAttribute("aria-pressed", "true");
+        } else {
+            card.classList.remove("is-active");
+            card.setAttribute("aria-pressed", "false");
+        }
+    });
+}
+
+function updateReplayControls() {
+    const total = explanationStepsData ? explanationStepsData.length : 0;
+    if (replayTotalSpan) replayTotalSpan.textContent = String(total);
+    // Show 0 at initial position (-1), otherwise 1-based step number
+    if (replayCurrentSpan) replayCurrentSpan.textContent = currentReplayStep < 0 ? "0" : String(currentReplayStep + 1);
+
+    const atStart = currentReplayStep < 0;
+    const atEnd   = currentReplayStep >= total - 1;
+    const busy    = replayAnimating;
+
+    if (replayPrevBtn) {
+        replayPrevBtn.disabled = atStart || busy;
+    }
+    if (replayNextBtn) {
+        replayNextBtn.disabled = atEnd || busy;
+    }
+    if (replayPlayBtn) {
+        replayPlayBtn.disabled = atEnd || busy;
+    }
+    if (replayPauseBtn) {
+        replayPauseBtn.disabled = busy;
+    }
+}
+
+function resetToInitialPosition() {
+    if (replayAnimating) return;
+    stopAutoPlay();
+    replayBoard = parseFenBoard(fen);
+    renderBoard(replayBoard);
+    clearHighlights();
+    currentReplayStep = -1;
+    updateActiveCard(-1);
+    updateReplayControls();
+}
+
+function replayStep(index, onFinish = null) {
+    if (replayAnimating) return;
+    if (!explanationStepsData || index < 0 || index >= explanationStepsData.length) {
+        if (onFinish) onFinish();
+        return;
+    }
+
+    const targetStep = explanationStepsData[index];
+    const cards = explanationSteps.querySelectorAll(".explanation-step");
+    const activeCard = cards[index] || null;
+
+    let priorBoard = parseFenBoard(fen);
+    for (let i = 0; i < index; i++) {
+        const step = explanationStepsData[i];
+        if (step && step.move_uci) {
+            const parsed = parseUciMove(step.move_uci);
+            if (parsed) {
+                priorBoard = applyMoveToBoard(priorBoard, parsed);
+            }
+        }
+    }
+
+    renderBoard(priorBoard);
+    clearHighlights();
+
+    const move = parseUciMove(targetStep.move_uci);
+    if (!move) {
+        replayBoard = priorBoard;
+        currentReplayStep = index;
+        updateActiveCard(index);
+        highlightSquares(targetStep.highlight_squares, activeCard);
+        updateReplayControls();
+        if (onFinish) onFinish();
+        return;
+    }
+
+    const movingPiece = priorBoard[move.fromRow][move.fromCol];
+    if (!movingPiece) {
+        replayBoard = priorBoard;
+        currentReplayStep = index;
+        updateActiveCard(index);
+        highlightSquares(targetStep.highlight_squares, activeCard);
+        updateReplayControls();
+        if (onFinish) onFinish();
+        return;
+    }
+
+    const special = {};
+    if (isCastling(movingPiece, move)) {
+        if (move.toCol === 6) {
+            special.rookFrom = isWhite(movingPiece) ? "h1" : "h8";
+            special.rookTo = isWhite(movingPiece) ? "f1" : "f8";
+        } else if (move.toCol === 2) {
+            special.rookFrom = isWhite(movingPiece) ? "a1" : "a8";
+            special.rookTo = isWhite(movingPiece) ? "d1" : "d8";
+        }
+    }
+
+    if (isEnPassant(movingPiece, move, priorBoard)) {
+        const files = "abcdefgh";
+        special.enPassantSquare = files[move.toCol] + (8 - move.fromRow);
+    }
+
+    replayAnimating = true;
+    updateReplayControls();
+
+    animatePieceMove(move.from, move.to, () => {
+        replayBoard = applyMoveToBoard(priorBoard, move);
+        renderBoard(replayBoard);
+        currentReplayStep = index;
+        updateActiveCard(index);
+        highlightSquares(targetStep.highlight_squares, activeCard);
+        replayAnimating = false;
+        updateReplayControls();
+        if (onFinish) onFinish();
+    }, special);
+}
+
+/* -----------------------------------------------------------------------
+   Auto-play / Pause
+----------------------------------------------------------------------- */
+
+function showPlayButton() {
+    if (replayPlayBtn)  replayPlayBtn.hidden  = false;
+    if (replayPauseBtn) replayPauseBtn.hidden = true;
+}
+
+function showPauseButton() {
+    if (replayPlayBtn)  replayPlayBtn.hidden  = true;
+    if (replayPauseBtn) replayPauseBtn.hidden = false;
+}
+
+function stopAutoPlay() {
+    if (autoPlayTimer !== null) {
+        clearTimeout(autoPlayTimer);
+        autoPlayTimer = null;
+    }
+    showPlayButton();
+    updateReplayControls();
+}
+
+function startAutoPlay() {
+    // If already at the last step, wrap back to the beginning
+    if (currentReplayStep >= (explanationStepsData ? explanationStepsData.length - 1 : 0)) {
+        resetToInitialPosition();
+    }
+
+    showPauseButton();
+    updateReplayControls();
+
+    function advance() {
+        if (!explanationStepsData || explanationStepsData.length === 0) {
+            stopAutoPlay();
+            return;
+        }
+        if (currentReplayStep >= explanationStepsData.length - 1) {
+            stopAutoPlay();
+            return;
+        }
+        replayStep(currentReplayStep + 1, () => {
+            if (autoPlayTimer !== null) {
+                if (currentReplayStep < explanationStepsData.length - 1) {
+                    autoPlayTimer = setTimeout(advance, 1000);
+                } else {
+                    stopAutoPlay();
+                }
+            }
+        });
+    }
+
+    autoPlayTimer = setTimeout(advance, 200);
+}
+
+
+/* -----------------------------------------------------------------------
+   UI state
+----------------------------------------------------------------------- */
+
+function setBoardStatus(text, type) {
+    if (boardStatusText) {
+        boardStatusText.textContent = text;
+    } else {
+        boardStatus.textContent = text;
+    }
+    boardStatus.className = `board-status status-${type}`;
+}
+
+function setLoading() {
+    pending.dataset.visible = "true";
+    pending.classList.remove("is-hidden");
+    errorBox.classList.add("is-hidden");
+    results.classList.add("is-hidden");
+    setBoardStatus("Stockfish analysis in progress…", "analyzing");
+    thinkingOrb?.setState?.("working");
+}
+
+function setError(message) {
+    thinkingOrb?.setState?.("idle");
+    pending.dataset.visible = "false";
+    pending.classList.add("is-hidden");
+    results.classList.add("is-hidden");
+    errorBox.classList.remove("is-hidden");
+    errorBox.textContent = message;
+    setBoardStatus("Analysis failed", "error");
+}
+
+function setSuccess() {
+    thinkingOrb?.setState?.("idle");
+    pending.dataset.visible = "false";
+    pending.classList.add("is-hidden");
+    errorBox.classList.add("is-hidden");
+    results.classList.remove("is-hidden");
+    setBoardStatus("Analysis grounded in Stockfish", "ready");
+}
+
+/* -----------------------------------------------------------------------
+   Formatting
+----------------------------------------------------------------------- */
+
+function formatEvaluation(cp) {
+    if (typeof cp !== "number" || !Number.isFinite(cp)) {
+        return "—";
+    }
+
+    // python-chess encodes forced mate using mate_score=100000
+    if (cp >= 90000) {
+        const moves = Math.max(1, 100000 - cp);
+        return `+M${moves}`;
+    }
+    if (cp <= -90000) {
+        const moves = Math.max(1, 100000 + cp);
+        return `-M${moves}`;
+    }
+
+    const pawns = cp / 100;
+    return (pawns >= 0 ? "+" : "") + pawns.toFixed(2);
+}
+
+/* -----------------------------------------------------------------------
+   1. WHAT: Engine Verdict Rendering
+----------------------------------------------------------------------- */
+
+function renderEvaluation(data) {
+    evalSummary.replaceChildren();
+
+    const header = document.createElement("div");
+    header.className = "verdict-header";
+
+    const eyebrow = document.createElement("span");
+    eyebrow.className = "verdict-eyebrow";
+    eyebrow.textContent = "ENGINE VERDICT";
+
+    const sourceBadge = document.createElement("span");
+    sourceBadge.className = "verdict-source-badge";
+    sourceBadge.textContent = (data.engine_source || "stockfish").toUpperCase();
+
+    header.append(eyebrow, sourceBadge);
+
+    const statsGrid = document.createElement("div");
+    statsGrid.className = "verdict-stats-grid";
+
+    // Best Move Stat
+    const moveStat = document.createElement("div");
+    moveStat.className = "verdict-stat";
+    const moveLabel = document.createElement("span");
+    moveLabel.className = "verdict-stat-label";
+    moveLabel.textContent = "BEST MOVE";
+    const moveVal = document.createElement("div");
+    moveVal.className = "verdict-move-val";
+    moveVal.textContent = data.best_move || "—";
+    moveStat.append(moveLabel, moveVal);
+
+    // Evaluation Stat
+    const evalStat = document.createElement("div");
+    evalStat.className = "verdict-stat";
+    const evalLabel = document.createElement("span");
+    evalLabel.className = "verdict-stat-label";
+    evalLabel.textContent = "EVALUATION";
+    const evalVal = document.createElement("div");
+    evalVal.className = "verdict-eval-val";
+    evalVal.textContent = formatEvaluation(data.eval_cp);
+    evalStat.append(evalLabel, evalVal);
+
+    statsGrid.append(moveStat, evalStat);
+
+    // Verdict Footer
+    const footer = document.createElement("div");
+    footer.className = "verdict-footer";
+
+    const note = document.createElement("span");
+    note.className = "verdict-explanation-note";
+    note.textContent = "Stockfish's top evaluated continuation from this position.";
+
+    const perspective = document.createElement("span");
+    perspective.className = "verdict-perspective-note";
+    perspective.textContent = "Evaluation is shown from the side-to-move perspective.";
+
+    footer.append(note, perspective);
+
+    evalSummary.append(header, statsGrid, footer);
+}
+
+/* -----------------------------------------------------------------------
+   Human move comparison
+----------------------------------------------------------------------- */
+
+function renderHumanComparison(comparison) {
+    humanComparison.replaceChildren();
+
+    if (!comparison) {
+        humanComparison.hidden = true;
+        if (evalSummary) evalSummary.hidden = false;
+        return;
+    }
+
+    humanComparison.hidden = false;
+    if (evalSummary) evalSummary.hidden = true;
+
+    const header = document.createElement("div");
+    header.className = "comparison-header";
+
+    const eyebrow = document.createElement("span");
+    eyebrow.className = "comparison-eyebrow";
+    eyebrow.textContent = "HUMAN MOVE COMPARISON";
+
+    header.appendChild(eyebrow);
+
+    const duel = document.createElement("div");
+    duel.className = "comparison-duel";
+
+    // Human move box ("The Question")
+    const humanBox = document.createElement("div");
+    humanBox.className = "comparison-box is-human";
+
+    const humanTitle = document.createElement("span");
+    humanTitle.className = "comparison-box-title";
+    humanTitle.textContent = "YOUR MOVE";
+
+    const humanMoveVal = document.createElement("span");
+    humanMoveVal.className = "comparison-box-move";
+    humanMoveVal.textContent = comparison.human_move || "—";
+
+    const humanEvalVal = document.createElement("span");
+    humanEvalVal.className = "comparison-box-eval";
+
+    if (comparison.human_eval_cp <= -90000) {
+        const moves = Math.max(1, 100000 + comparison.human_eval_cp);
+        humanEvalVal.textContent = `Mated in ${moves} (${formatEvaluation(comparison.human_eval_cp)})`;
+    } else if (comparison.human_eval_cp >= 90000) {
+        const moves = Math.max(1, 100000 - comparison.human_eval_cp);
+        humanEvalVal.textContent = `Mate in ${moves} (${formatEvaluation(comparison.human_eval_cp)})`;
+    } else {
+        humanEvalVal.textContent = formatEvaluation(comparison.human_eval_cp);
+    }
+    humanBox.append(humanTitle, humanMoveVal, humanEvalVal);
+
+    // Center Evaluation Swing
+    let isMate = false;
+    let swingValText = "";
+
+    if (comparison.human_eval_cp <= -90000 && comparison.best_eval_cp > -90000) {
+        const moves = Math.max(1, 100000 + comparison.human_eval_cp);
+        swingValText = `Allows forced mate in ${moves}`;
+        isMate = true;
+    } else if (comparison.best_eval_cp >= 90000 && comparison.human_eval_cp < 90000) {
+        const moves = Math.max(1, 100000 - comparison.best_eval_cp);
+        swingValText = `Missed forced mate in ${moves}`;
+        isMate = true;
+    } else if (Math.abs(comparison.human_eval_cp) >= 90000 || Math.abs(comparison.best_eval_cp) >= 90000) {
+        swingValText = "Decisive mate swing";
+        isMate = true;
+    } else {
+        const swingPawns = Math.abs(comparison.eval_swing_cp ?? 0) / 100;
+        if (comparison.eval_swing_cp === 0) {
+            swingValText = "0.0 pawns";
+        } else {
+            swingValText = `−${swingPawns.toFixed(1)} pawns`;
+        }
+    }
+
+    let swingClass = "eval-swing--neutral";
+    if (isMate) {
+        swingClass = "eval-swing--red";
+    } else {
+        const swingMagnitude = Math.abs((comparison.eval_swing_cp ?? 0) / 100);
+        if (swingMagnitude < 0.5) {
+            swingClass = "eval-swing--neutral";
+        } else if (swingMagnitude <= 1.5) {
+            swingClass = "eval-swing--amber";
+        } else {
+            swingClass = "eval-swing--red";
+        }
+    }
+
+    const centerSwing = document.createElement("div");
+    centerSwing.className = `comparison-center-swing ${swingClass}`;
+
+    const leftArrow = document.createElement("span");
+    leftArrow.className = "comparison-swing-arrow";
+    leftArrow.setAttribute("aria-hidden", "true");
+    leftArrow.textContent = "←";
+
+    const swingBadge = document.createElement("div");
+    swingBadge.className = "comparison-swing-badge";
+
+    const swingLabel = document.createElement("span");
+    swingLabel.className = "comparison-swing-label";
+    swingLabel.textContent = "EVALUATION SWING";
+
+    const swingVal = document.createElement("span");
+    swingVal.className = `comparison-swing-val ${swingClass}`;
+    swingVal.textContent = swingValText;
+
+    swingBadge.append(swingLabel, swingVal);
+
+    const rightArrow = document.createElement("span");
+    rightArrow.className = "comparison-swing-arrow";
+    rightArrow.setAttribute("aria-hidden", "true");
+    rightArrow.textContent = "→";
+
+    centerSwing.append(leftArrow, swingBadge, rightArrow);
+
+    // Engine best move box ("The Answer")
+    const bestBox = document.createElement("div");
+    bestBox.className = "comparison-box is-engine";
+
+    const bestTitle = document.createElement("span");
+    bestTitle.className = "comparison-box-title";
+    bestTitle.textContent = "BEST MOVE";
+
+    const bestMoveVal = document.createElement("span");
+    bestMoveVal.className = "comparison-box-move";
+    bestMoveVal.textContent = comparison.best_move || "—";
+
+    const bestEvalVal = document.createElement("span");
+    bestEvalVal.className = "comparison-box-eval";
+
+    if (comparison.best_eval_cp >= 90000) {
+        const moves = Math.max(1, 100000 - comparison.best_eval_cp);
+        bestEvalVal.textContent = `Mate in ${moves} (${formatEvaluation(comparison.best_eval_cp)})`;
+    } else if (comparison.best_eval_cp <= -90000) {
+        const moves = Math.max(1, 100000 + comparison.best_eval_cp);
+        bestEvalVal.textContent = `Mated in ${moves} (${formatEvaluation(comparison.best_eval_cp)})`;
+    } else {
+        bestEvalVal.textContent = formatEvaluation(comparison.best_eval_cp);
+    }
+    bestBox.append(bestTitle, bestMoveVal, bestEvalVal);
+
+    duel.append(humanBox, centerSwing, bestBox);
+    humanComparison.append(header, duel);
+}
+
+/* -----------------------------------------------------------------------
+   2. WHY: Explanation Steps
+----------------------------------------------------------------------- */
+
+function renderSteps(steps) {
+    explanationSteps.replaceChildren();
+    clearHighlights();
+
+    explanationStepsData = Array.isArray(steps) ? steps : [];
+    replayBoard = parseFenBoard(fen);
+    currentReplayStep = -1;
+    updateReplayControls();
+
+    if (!Array.isArray(steps) || steps.length === 0) {
+        const empty = document.createElement("p");
+        empty.className = "muted";
+        empty.textContent = "No verifiable explanation steps were produced for this position.";
+        explanationSteps.appendChild(empty);
+        return;
+    }
+
+    steps.forEach((step, index) => {
+        const card = document.createElement("article");
+        const stepNum = index + 1;
+        card.className = `explanation-step card-step-${String(stepNum).padStart(2, "0")}`;
+        card.tabIndex = 0;
+        card.setAttribute("role", "button");
+        card.setAttribute("aria-label", `Step ${stepNum}`);
+
+        const number = document.createElement("div");
+        number.className = "step-number";
+        number.textContent = String(stepNum).padStart(2, "0");
+
+        const content = document.createElement("div");
+        content.className = "step-content";
+
+        const topLine = document.createElement("div");
+        topLine.className = "step-top-line";
+
+        if (step.move_uci) {
+            const badge = document.createElement("span");
+            badge.className = "step-move-badge";
+            badge.textContent = step.move_uci;
+            topLine.appendChild(badge);
+        }
+
+        const squares = Array.isArray(step.highlight_squares)
+            ? step.highlight_squares
+            : [];
+
+        if (squares.length > 0) {
+            const squaresRow = document.createElement("div");
+            squaresRow.className = "step-squares-row";
+
+            const label = document.createElement("span");
+            label.className = "step-squares-label";
+            label.textContent = "Squares:";
+            squaresRow.appendChild(label);
+
+            squares.forEach((sq) => {
+                const badge = document.createElement("span");
+                badge.className = "square-badge";
+                badge.textContent = sq;
+                squaresRow.appendChild(badge);
+            });
+
+            topLine.appendChild(squaresRow);
+        }
+
+        if (topLine.children.length > 0) {
+            content.appendChild(topLine);
+        }
+
+        const text = document.createElement("p");
+        text.className = "step-text";
+        text.textContent = typeof step.text === "string" ? step.text : "";
+        content.appendChild(text);
+
+        card.append(number, content);
+
+        const triggerReplay = () => {
+            stopAutoPlay();
+            replayStep(index);
+        };
+
+        card.addEventListener("click", triggerReplay);
+        card.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                triggerReplay();
+            }
+        });
+
+        explanationSteps.appendChild(card);
+    });
+}
+
+/* -----------------------------------------------------------------------
+   3. EVIDENCE: Engine Evidence Telemetry
+----------------------------------------------------------------------- */
+
+function renderEvidence(data) {
+    evidenceContainer.replaceChildren();
+
+    // 1. Engine Source
+    const sourceItem = document.createElement("div");
+    sourceItem.className = "evidence-item";
+    const sourceLabel = document.createElement("span");
+    sourceLabel.className = "evidence-item-label";
+    sourceLabel.textContent = "Engine Source";
+    const sourceVal = document.createElement("span");
+    sourceVal.className = "evidence-item-value";
+    sourceVal.textContent = data.engine_source === "stockfish"
+        ? "Stockfish"
+        : (data.engine_source || "Stockfish");
+    sourceItem.append(sourceLabel, sourceVal);
+
+    // 2. Best Move
+    const moveItem = document.createElement("div");
+    moveItem.className = "evidence-item";
+    const moveLabel = document.createElement("span");
+    moveLabel.className = "evidence-item-label";
+    moveLabel.textContent = "Preferred Move";
+    const moveVal = document.createElement("span");
+    moveVal.className = "evidence-item-value";
+    moveVal.textContent = data.best_move || "—";
+    moveItem.append(moveLabel, moveVal);
+
+    // 3. Evaluation
+    const evalItem = document.createElement("div");
+    evalItem.className = "evidence-item";
+    const evalLabel = document.createElement("span");
+    evalLabel.className = "evidence-item-label";
+    evalLabel.textContent = "Evaluation (cp)";
+    const evalVal = document.createElement("span");
+    evalVal.className = "evidence-item-value";
+    if (data.eval_cp >= 90000) {
+        const moves = Math.max(1, 100000 - data.eval_cp);
+        evalVal.textContent = `+M${moves} (Mate in ${moves})`;
+    } else if (data.eval_cp <= -90000) {
+        const moves = Math.max(1, 100000 + data.eval_cp);
+        evalVal.textContent = `-M${moves} (Mated in ${moves})`;
+    } else {
+        evalVal.textContent = `${formatEvaluation(data.eval_cp)} (${data.eval_cp ?? 0} cp)`;
+    }
+    evalItem.append(evalLabel, evalVal);
+
+    // 4. Unique Verified Key Squares
+    const allSquares = [];
+    if (Array.isArray(data.explanation_steps)) {
+        data.explanation_steps.forEach((s) => {
+            if (Array.isArray(s.highlight_squares)) {
+                s.highlight_squares.forEach((sq) => {
+                    if (!allSquares.includes(sq)) {
+                        allSquares.push(sq);
+                    }
+                });
+            }
+        });
+    }
+
+    const squaresItem = document.createElement("div");
+    squaresItem.className = "evidence-item";
+    const squaresLabel = document.createElement("span");
+    squaresLabel.className = "evidence-item-label";
+    squaresLabel.textContent = "Verified Squares";
+    const squaresList = document.createElement("div");
+    squaresList.className = "evidence-squares-list";
+
+    if (allSquares.length > 0) {
+        allSquares.forEach((sq) => {
+            const b = document.createElement("span");
+            b.className = "square-badge";
+            b.textContent = sq;
+            squaresList.appendChild(b);
+        });
+    } else {
+        const none = document.createElement("span");
+        none.className = "muted";
+        none.textContent = "None cited";
+        squaresList.appendChild(none);
+    }
+    squaresItem.append(squaresLabel, squaresList);
+
+    // 5. Continuation Move Citations
+    const citedMoves = [];
+    if (Array.isArray(data.explanation_steps)) {
+        data.explanation_steps.forEach((s) => {
+            if (s.move_uci && !citedMoves.includes(s.move_uci)) {
+                citedMoves.push(s.move_uci);
+            }
+        });
+    }
+
+    if (citedMoves.length > 0) {
+        const movesItem = document.createElement("div");
+        movesItem.className = "evidence-item";
+        const movesLabel = document.createElement("span");
+        movesLabel.className = "evidence-item-label";
+        movesLabel.textContent = "Cited Moves";
+        const movesList = document.createElement("div");
+        movesList.className = "evidence-squares-list";
+        citedMoves.forEach((mv) => {
+            const b = document.createElement("span");
+            b.className = "step-move-badge";
+            b.textContent = mv;
+            movesList.appendChild(b);
+        });
+        movesItem.append(movesLabel, movesList);
+        evidenceContainer.append(sourceItem, moveItem, evalItem, squaresItem, movesItem);
+    } else {
+        evidenceContainer.append(sourceItem, moveItem, evalItem, squaresItem);
+    }
+}
+
+/* -----------------------------------------------------------------------
+   Copy FEN helper
+----------------------------------------------------------------------- */
+
+if (copyFenBtn) {
+    copyFenBtn.addEventListener("click", async () => {
+        if (!fen) return;
+        try {
+            await navigator.clipboard.writeText(fen);
+            copyFenBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3fb950" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+            setTimeout(() => {
+                copyFenBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+            }, 1600);
+        } catch (e) {
+            console.warn("Could not copy FEN to clipboard:", e);
+        }
+    });
+}
+
+/* -----------------------------------------------------------------------
+   API
+----------------------------------------------------------------------- */
+
+async function analyzePosition() {
+    if (!fen) {
+        setError("No position was selected. Return to the home page.");
+        return;
+    }
+
+    setLoading();
+
+    try {
+        const response = await fetch("/api/analyze", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                fen: fen,
+                human_move: humanMove
+            })
+        });
+
+        let body = null;
+        try {
+            body = await response.json();
+        } catch (_) {
+            body = null;
+        }
+
+        if (!response.ok) {
+            let detail = `HTTP ${response.status}`;
+            if (body && typeof body.detail === "string") {
+                detail = body.detail;
+            }
+            setError(`Analysis failed (${response.status}): ${detail}`);
+            return;
+        }
+
+        if (!body || typeof body !== "object") {
+            setError("The analysis server returned an invalid response.");
+            return;
+        }
+
+        if (body.engine_source && body.engine_source !== "stockfish") {
+            setError("Analysis did not come from Stockfish. The result was rejected.");
+            return;
+        }
+
+        renderEvaluation(body);
+        renderHumanComparison(body.human_move_comparison);
+
+        const currentHumanMove = (body.human_move_comparison && body.human_move_comparison.human_move) || humanMove;
+        const currentBestMove = (body.human_move_comparison && body.human_move_comparison.best_move) || body.best_move;
+
+        if (explanationHeader) {
+            const sectionTitle = (body.human_move_comparison && currentHumanMove)
+                ? `WHY ${currentBestMove.toUpperCase()} IS BETTER THAN ${currentHumanMove.toUpperCase()}`
+                : 'WHY THIS MOVE MATTERS';
+            explanationHeader.textContent = sectionTitle;
+        }
+
+        renderSteps(body.explanation_steps);
+        renderEvidence(body);
+        setSuccess();
+
+    } catch (error) {
+        console.error("Whyfish analysis error:", error);
+        setError("Could not reach the Whyfish server. Make sure the server is running.");
+    }
+}
+
+/* -----------------------------------------------------------------------
+   Initialize
+----------------------------------------------------------------------- */
+
+async function initialize() {
+    setLoading();
+    await initThinkingOrb();
+
+    if (!fen) {
+        setError("No FEN position was found. Return to the home page.");
+        return;
+    }
+
+    fenDisplay.textContent = fen;
+
+    try {
+        renderBoard();
+    } catch (error) {
+        console.error("Board rendering error:", error);
+        setError(error.message || "Could not render the chessboard.");
+        return;
+    }
+
+    if (replayPrevBtn) {
+        replayPrevBtn.addEventListener("click", () => {
+            if (replayAnimating) return;
+            stopAutoPlay();
+            if (currentReplayStep > 0) {
+                replayStep(currentReplayStep - 1);
+            } else if (currentReplayStep === 0) {
+                resetToInitialPosition();
+            }
+        });
+    }
+
+    if (replayNextBtn) {
+        replayNextBtn.addEventListener("click", () => {
+            if (replayAnimating) return;
+            stopAutoPlay();
+            if (explanationStepsData && currentReplayStep < explanationStepsData.length - 1) {
+                replayStep(currentReplayStep + 1);
+            }
+        });
+    }
+
+    if (replayPlayBtn) {
+        replayPlayBtn.addEventListener("click", () => {
+            if (replayAnimating) return;
+            startAutoPlay();
+        });
+    }
+
+    if (replayPauseBtn) {
+        replayPauseBtn.addEventListener("click", () => {
+            stopAutoPlay();
+        });
+    }
+
+    await analyzePosition();
+}
+
+initialize();
+</script>
+
+<script>
+(function () {
+    const toggleBtn = document.getElementById("theme-toggle");
+    if (!toggleBtn) return;
+
+    function syncToggleState(theme) {
+        const isLight = theme === "light";
+        toggleBtn.setAttribute("aria-checked", isLight ? "true" : "false");
+        toggleBtn.setAttribute(
+            "aria-label",
+            isLight ? "Switch to dark theme" : "Switch to light theme"
+        );
+    }
+
+    const currentTheme = document.documentElement.dataset.theme || "dark";
+    syncToggleState(currentTheme);
+
+    toggleBtn.addEventListener("click", () => {
+        const activeTheme = document.documentElement.dataset.theme === "light" ? "light" : "dark";
+        const nextTheme = activeTheme === "light" ? "dark" : "light";
+        document.documentElement.dataset.theme = nextTheme;
+        localStorage.setItem("whyfish-theme", nextTheme);
+        syncToggleState(nextTheme);
+
+        if (window.thinkingOrb && typeof window.thinkingOrb.setTheme === "function") {
+            window.thinkingOrb.setTheme(nextTheme);
+        }
+    });
+
+    window.matchMedia("(prefers-color-scheme: light)").addEventListener("change", (e) => {
+        if (!localStorage.getItem("whyfish-theme")) {
+            const newTheme = e.matches ? "light" : "dark";
+            document.documentElement.dataset.theme = newTheme;
+            syncToggleState(newTheme);
+            if (window.thinkingOrb && typeof window.thinkingOrb.setTheme === "function") {
+                window.thinkingOrb.setTheme(newTheme);
+            }
+        }
+    });
+})();
+</script>
+
+</body>
+</html>
