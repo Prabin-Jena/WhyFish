@@ -6,7 +6,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 ENV PATH="/usr/local/bin:/usr/games:$PATH"
-RUN which stockfish && stockfish --version
+RUN command -v stockfish && stockfish --version
 WORKDIR /app
 
 COPY requirements.txt .
